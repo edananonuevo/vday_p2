@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Love You Heart</title>
+<style>
+  body {
+    margin: 0;
+    background: white;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  #ui {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .love_word {
+    position: absolute;
+    color: #FF77A9;
+    font-family: Montserrat, sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    white-space: nowrap;
+    text-shadow: 0 0 12px #FFD1DC;
+    transform-origin: center center; /* Adjusted to center */
+    transform: translate(-50%, -50%) rotate(-24deg); /* Center alignment */
+  }
+</style>
+</head>
+<body>
+
+<div id="ui"></div>
+
+<script>
+  const container = document.getElementById("ui");
+  const scale = 20;
+  const textCount = 70;  // number of texts
+  const speed = 0.05;    // pixels per frame
+
+  // Heart equation
+  function heart(t) {
+  return {
+      x: 16 * Math.pow(Math.sin(t), 3),
+      y: 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)
+  };
+  }
+
+  /* -------------------------------
+  Build arc-length lookup table
+  -------------------------------- */
+  const samples = 2000;
+  const path = [];
+  let totalLength = 0;
+
+  let prev = heart(0);
+  for (let i = 1; i <= samples; i++) {
+  const t = (Math.PI * 2 * i) / samples;
+  const p = heart(t);
+
+  const dx = p.x - prev.x;
+  const dy = p.y - prev.y;
+  const dist = Math.hypot(dx, dy);
+
+  totalLength += dist;
+  path.push({ t, length: totalLength });
+
+  prev = p;
+  }
+
+  // Find t for a given distance along the heart
+  function getTAtLength(target) {
+  target %= totalLength;
+  for (let i = 0; i < path.length; i++) {
+      if (path[i].length >= target) return path[i].t;
+  }
+  return 0;
+  }
+
+  /* -------------------------------
+  Automatically compute heart center
+  -------------------------------- */
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i <= samples; i++) {
+  const t = (Math.PI * 2 * i) / samples;
+  const p = heart(t);
+  if (p.x < minX) minX = p.x;
+  if (p.x > maxX) maxX = p.x;
+  if (p.y < minY) minY = p.y;
+  if (p.y > maxY) maxY = p.y;
+  }
+
+  // Adjust offsets to ensure proper centering
+  const offsetX = (minX + maxX) / 2;
+  const offsetY = (minY + maxY) / 2;
+
+  /* -------------------------------
+  Create multiple texts
+  -------------------------------- */
+  const texts = [];
+  for (let i = 0; i < textCount; i++) {
+  const el = document.createElement("div");
+  el.className = "love_word";
+  el.textContent = "I LOVE YOU";
+  container.appendChild(el);
+  texts.push(el);
+  }
+
+  /* -------------------------------
+  Animation
+  -------------------------------- */
+  let distance = 0;
+
+  function animate() {
+  distance += speed;
+
+  const centerX = container.clientWidth / 2;
+  const centerY = container.clientHeight / 2;
+
+  texts.forEach((el, i) => {
+      const offset = (i / textCount) * totalLength;
+      const t = getTAtLength(distance + offset);
+      const p = heart(t);
+
+      const x = centerX + (p.x - offsetX) * scale;
+      const y = centerY - (p.y - offsetY) * scale;
+
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+
+      // Slight fixed tilt for a natural look
+      el.style.transform = "translate(-50%, -50%) rotate(-24deg)";
+  });
+
+  requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
