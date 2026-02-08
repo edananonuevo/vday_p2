@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Love You Heart</title>
+<title>VALENTINE'S DAY PART 2</title>
 <style>
   body {
     margin: 0;
@@ -14,6 +14,12 @@
     height: 100vh;
   }
 
+  #heart-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
   #ui {
     position: relative;
     width: 100%;
@@ -23,125 +29,259 @@
   .love_word {
     position: absolute;
     color: #FF77A9;
-    font-family: Montserrat, sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 3px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
     white-space: nowrap;
-    text-shadow: 0 0 12px #FFD1DC;
+    text-shadow: 
+      0 0 4px rgba(255,64,129,0.5),
+      0 0 8px rgba(255,64,129,0.3),
+      0 0 12px rgba(255,64,129,0.2);
     transform-origin: center center; /* Adjusted to center */
     transform: translate(-50%, -50%) rotate(-24deg); /* Center alignment */
+  }
+
+  #valentine-text {
+    position: absolute;
+    top: 24%;
+    width: 100%;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 100;
+    font-size: 3rem;
+    letter-spacing: 4px;
+    color: #FF77A9;
+    text-shadow: 0 0 24px #ffc4d2;
+  }
+
+  #question-text {
+    position: absolute;   /* so you can place it wherever you want on screen */
+    top: 75%;             /* adjust vertical placement */
+    width: 100%;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 100;
+    font-size: 3rem;
+    letter-spacing: 2px;
+    color: #FF77A9;
+    text-shadow: 0 0 12px #FFD1DC;
+    opacity: 0;           /* initially hidden */
+    transition: opacity 0.5s ease;  /* smooth fade in/out */
+  }
+
+  #continue-controls {
+    position: absolute;
+    bottom: 25%;
+    width: 100%;
+    text-align: center;
+  }
+
+  #yes-no-controls {
+    position: absolute;
+    bottom: 30%;
+    width: 100%;
+    text-align: center;
+  }
+
+  #continue-button {
+    padding: 10px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 100;
+    font-size: 2rem;
+    background-color: white;
+    color: #FF77A9;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #yes-no-controls button {
+    padding: 10px 20px;
+    font-size: 2rem;
+    margin: 0 20px; /* Increased gap between buttons */
+    background-color: #FF77A9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0; /* Initially hidden */
   }
 </style>
 </head>
 <body>
+  <div id="heart-container">
+    <h1 id="valentine-text">HAPPY VALENTINE'S DAY</h1>
+    <div id="ui"></div>
+    <h2 id="question-text">DO YOU WANT A SURPISE?</h2>
+  </div>
+  <div id="continue-controls">
+    <button id="continue-button">CONTINUE →</button>
+  </div>
 
-<div id="ui"></div>
+  <div id="yes-no-controls">
+    <button id="yes-button">YES</button>
+    <button id="no-button">NO</button>
+  </div>
 
-<script>
-  const container = document.getElementById("ui");
-  const scale = 20;
-  const textCount = 70;  // number of texts
-  const speed = 0.05;    // pixels per frame
+  <script>
+    const container = document.getElementById("ui");
+    const scale = 20;
+    const textCount = 70; // number of texts
+    const speed = 0.05; // pixels per frame
 
-  // Heart equation
-  function heart(t) {
-  return {
-      x: 16 * Math.pow(Math.sin(t), 3),
-      y: 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)
-  };
-  }
+    // Heart equation
+    function heart(t) {
+      return {
+        x: 16 * Math.pow(Math.sin(t), 3),
+        y:
+          13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t),
+      };
+    }
 
-  /* -------------------------------
-  Build arc-length lookup table
-  -------------------------------- */
-  const samples = 2000;
-  const path = [];
-  let totalLength = 0;
+    /* -------------------------------
+    Build arc-length lookup table
+    -------------------------------- */
+    const samples = 2000;
+    const path = [];
+    let totalLength = 0;
 
-  let prev = heart(0);
-  for (let i = 1; i <= samples; i++) {
-  const t = (Math.PI * 2 * i) / samples;
-  const p = heart(t);
-
-  const dx = p.x - prev.x;
-  const dy = p.y - prev.y;
-  const dist = Math.hypot(dx, dy);
-
-  totalLength += dist;
-  path.push({ t, length: totalLength });
-
-  prev = p;
-  }
-
-  // Find t for a given distance along the heart
-  function getTAtLength(target) {
-  target %= totalLength;
-  for (let i = 0; i < path.length; i++) {
-      if (path[i].length >= target) return path[i].t;
-  }
-  return 0;
-  }
-
-  /* -------------------------------
-  Automatically compute heart center
-  -------------------------------- */
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-  for (let i = 0; i <= samples; i++) {
-  const t = (Math.PI * 2 * i) / samples;
-  const p = heart(t);
-  if (p.x < minX) minX = p.x;
-  if (p.x > maxX) maxX = p.x;
-  if (p.y < minY) minY = p.y;
-  if (p.y > maxY) maxY = p.y;
-  }
-
-  // Adjust offsets to ensure proper centering
-  const offsetX = (minX + maxX) / 2;
-  const offsetY = (minY + maxY) / 2;
-
-  /* -------------------------------
-  Create multiple texts
-  -------------------------------- */
-  const texts = [];
-  for (let i = 0; i < textCount; i++) {
-  const el = document.createElement("div");
-  el.className = "love_word";
-  el.textContent = "I LOVE YOU";
-  container.appendChild(el);
-  texts.push(el);
-  }
-
-  /* -------------------------------
-  Animation
-  -------------------------------- */
-  let distance = 0;
-
-  function animate() {
-  distance += speed;
-
-  const centerX = container.clientWidth / 2;
-  const centerY = container.clientHeight / 2;
-
-  texts.forEach((el, i) => {
-      const offset = (i / textCount) * totalLength;
-      const t = getTAtLength(distance + offset);
+    let prev = heart(0);
+    for (let i = 1; i <= samples; i++) {
+      const t = (Math.PI * 2 * i) / samples;
       const p = heart(t);
 
-      const x = centerX + (p.x - offsetX) * scale;
-      const y = centerY - (p.y - offsetY) * scale;
+      const dx = p.x - prev.x;
+      const dy = p.y - prev.y;
+      const dist = Math.hypot(dx, dy);
 
-      el.style.left = x + "px";
-      el.style.top = y + "px";
+      totalLength += dist;
+      path.push({ t, length: totalLength });
 
-      // Slight fixed tilt for a natural look
-      el.style.transform = "translate(-50%, -50%) rotate(-24deg)";
-  });
+      prev = p;
+    }
 
-  requestAnimationFrame(animate);
-  }
+    // Find t for a given distance along the heart
+    function getTAtLength(target) {
+      target %= totalLength;
+      for (let i = 0; i < path.length; i++) {
+          if (path[i].length >= target) return path[i].t;
+      }
+      return 0;
+    }
 
-  animate();
-</script>
+    /* -------------------------------
+    Automatically compute heart center
+    -------------------------------- */
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i <= samples; i++) {
+      const t = (Math.PI * 2 * i) / samples;
+      const p = heart(t);
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
 
+    // Adjust offsets to ensure proper centering
+    const offsetX = (minX + maxX) / 2;
+    const offsetY = (minY + maxY) / 2;
+
+    /* -------------------------------
+    Create multiple texts
+    -------------------------------- */
+    const texts = [];
+    for (let i = 0; i < textCount; i++) {
+      const el = document.createElement("div");
+      el.className = "love_word";
+      el.textContent = "I LOVE YOU";
+      container.appendChild(el);
+      texts.push(el);
+    }
+
+    /* -------------------------------
+    Animation
+    -------------------------------- */
+    let distance = 0;
+
+    function animate() {
+      distance += speed;
+
+      const centerX = container.clientWidth / 2;
+      const centerY = container.clientHeight / 2;
+
+      texts.forEach((el, i) => {
+        const offset = (i / textCount) * totalLength;
+        const t = getTAtLength(distance + offset);
+        const p = heart(t);
+
+        const x = centerX + (p.x - offsetX) * scale;
+        const y = centerY - (p.y - offsetY) * scale;
+
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+
+        // Slight fixed tilt for a natural look
+        el.style.transform = "translate(-50%, -50%) rotate(-24deg)";
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    document.getElementById("continue-button").addEventListener("click", () => {
+        // Move the heart container up
+        const heartContainer = document.getElementById("heart-container");
+        heartContainer.style.transform = "translateY(-20%)";
+        heartContainer.style.transition = "transform 0.5s ease";
+
+        // Remove the valentine text and continue button
+        document.getElementById("valentine-text").remove();
+        document.getElementById("continue-button").remove();
+
+        // Add question text under the heart
+        const question = document.getElementById("question-text");
+        question.style.opacity = 1; // fade in when ready
+
+        // Add buttons
+        const yesButton = document.getElementById("yes-button");
+        yesButton.style.position = "absolute";
+        yesButton.style.left = "30%"; // Specify the horizontal position
+        yesButton.style.top = "60%"; // Specify the vertical position
+        const noButton = document.getElementById("no-button");
+        noButton.style.position = "absolute";
+        noButton.style.right = "30%"; // Specify the horizontal position
+        noButton.style.top = "60%"; // Specify the vertical position
+        setTimeout(() => {
+          yesButton.style.opacity = 1;
+          noButton.style.opacity = 1;
+        }, 1000);
+      });
+
+      document.getElementById("no-button").addEventListener("click", () => {
+        const noButton = document.getElementById("no-button");
+
+        // Define 5 random positions
+        const positions = [
+          { x: "10%", y: "50%" },
+          { x: "70%", y: "30%" },
+          { x: "20%", y: "70%" },
+          { x: "80%", y: "80%" },
+          { x: "40%", y: "20%" },
+        ];
+
+        // Get a random position from the list
+        const randomPosition = positions[Math.floor(Math.random() * positions.length)];
+
+        // Move the No button to the new position
+        noButton.style.position = "absolute";
+        noButton.style.left = randomPosition.x;
+        noButton.style.top = randomPosition.y;
+      });
+  </script>
 </body>
 </html>
