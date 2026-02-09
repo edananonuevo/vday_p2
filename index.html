@@ -67,6 +67,7 @@
     text-shadow: 0 0 12px #FFD1DC;
     opacity: 0;           /* initially hidden */
     transition: opacity 0.5s ease;  /* smooth fade in/out */
+    white-space: pre-line;
   }
 
   #continue-controls {
@@ -326,8 +327,25 @@
           document.getElementById("no-button").style.display = "none";
 
           setTimeout(() => {
-            questionText.textContent = "YOUR PRESENT IS COMING SOON. THINK BACK FOR YOUR CLUES.";
+            questionText.textContent = "YOUR SURPRISE IS ON ITS WAY.\nDO YOU WANT TO KNOW MORE?";
           }, 5000); // Adjust the delay as needed
+
+          setTimeout(() => {
+            questionText.textContent = "FOLLOW THE QUESTIONS YOUR HEART ALREADY ANSWERED...";
+          }, 15000); // Adjusted to 15 seconds after the first message
+
+          setTimeout(() => {
+            questionText.textContent = "FOR EACH QUESTION,\nA QUIET CLUE LIES.";
+
+            // After displaying the last message, hide the question text and move the heart back to the middle
+            setTimeout(() => {
+              questionText.style.display = "none"; // Hide the question text
+
+              const heartContainer = document.getElementById("heart-container");
+              heartContainer.style.transform = "translateY(0)"; // Move the heart back to the middle
+              heartContainer.style.transition = "transform 0.5s ease";
+            }, 10000); // Delay before hiding and moving the heart
+          }, 25000); // Adjusted to 25 seconds after the first message
         }
 
       });
