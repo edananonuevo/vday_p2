@@ -6,7 +6,12 @@
 <style>
   body {
     margin: 0;
-    background: white;
+    background: radial-gradient(
+      circle at top,
+      #fff0f5 0%,
+      #ffe4ec 35%,
+      #fff4f4 70%
+    );
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -18,6 +23,24 @@
     position: absolute;
     width: 100%;
     height: 100%;
+  }
+
+  #heart-glow {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 119, 169, 0.25),
+      transparent 70%
+    );
+    filter: blur(40px);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 0.9; }
   }
 
   #ui {
@@ -94,7 +117,7 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 100;
     font-size: 2rem;
-    background-color: white;
+    background-color: transparent;
     color: #FF77A9;
     border: none;
     border-radius: 5px;
@@ -120,6 +143,7 @@
     <h1 id="valentine-text">HAPPY VALENTINE'S DAY</h1>
     <div id="ui"></div>
     <h2 id="question-text">DO YOU WANT A SURPISE?</h2>
+    <div id="heart-glow"></div>
   </div>
   <div id="continue-controls">
     <button id="continue-button">CONTINUE →</button>
@@ -134,7 +158,7 @@
     const container = document.getElementById("ui");
     const scale = 20;
     const textCount = 70; // number of texts
-    const speed = 0.5; // pixels per frame
+    const speed = 0.4; // 0.01 PC, 0.4 Phone
 
     // Heart equation
     function heart(t) {
